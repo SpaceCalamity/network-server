@@ -20,6 +20,14 @@ class IPC:
     try:
       self.sock.connect(('localhost', port))
       try:
+        self.sock.sendall(IPC.__flush('users'))
+        data = self.__readData()
+        if data == 'failed':
+          print('IPC Error: Server did not expect this client')
+          return
+        elif data != 'connected':
+          print('IPC Error: Assertion error (unexpected message <%s>)' % data)
+          return
         thread = threading.Thread(target=self.__pipe)
         thread.start()
       except Exception as e:
@@ -31,6 +39,12 @@ class IPC:
   def close(self):
     self.sock.close()
 
+  def __readData(self):
+    data = ''
+    while (byte := self.sock.recv(1)) != b'\n':
+      data += byte.decode()
+    return data
+
   def __pipe(self):
     try:
       while self.active:
@@ -41,9 +55,7 @@ class IPC:
             print('IPC Error: Queue is empty on get')
             comm = ''
           self.sock.sendall(IPC.__flush(comm))
-        data = ''
-        while (byte := self.sock.recv(1)) != b'\n':
-          data += byte.decode()
+        data = self.__readData()
         comm_handler.handle(data)
     except Exception e:
       print('IPC Error: Pipe connection failed')
