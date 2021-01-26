@@ -77,12 +77,12 @@ class Server:
         while not self.comm_queue.empty():
           try:
             comm = self.comm_queue.get()
-          except Exception:
+          except:
             print('IPC Error: Queue is empty on get')
             comm = ''
           if comm:
             self.sock.sendall(__flush(comm))
-    except Exception e:
+    except Exception as e:
       print('IPC Error: Pipe connection failed (out thread)')
       print(e)
       self.close()
@@ -94,7 +94,7 @@ class Server:
         while (byte := self.sock.recv(1)) != b'\n':
           data += byte.decode()
         self.__handle(data)
-    except Exception e:
+    except Exception as e:
       print('IPC Error: Pipe connection failed (in thread)')
       print(e)
       self.close()
