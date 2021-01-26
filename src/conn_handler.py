@@ -88,7 +88,7 @@ class User:
         while not self.comm_queue.empty():
           try:
             comm = self.comm_queue.get()
-          except Exception:
+          except:
             print('Server Error: Queue is empty on get (%s)' % self.addr[0])
             comm = ''
           if comm:
